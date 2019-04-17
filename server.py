@@ -1,6 +1,6 @@
 import os
 import redis
-from flask import Flask, redirect, request, render_template, session
+from flask import Flask, Response, redirect, request, render_template, session
 
 r = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')
 
@@ -16,16 +16,16 @@ def create_quiz():
 @application.route('/login', methods=['GET', 'POST'])
 def login():
 	if request.method == 'GET':
-		return render_template('login.xhtml')
+		return Response(render_template('login.xhtml'), mimetype='application/xhtml+xml')
 	if False: # TODO this branch executes when name was already taken
-		return render_template('login.xhtml', error=True)
+		return Response(render_template('login.xhtml', error=True), mimetype='application/xhtml+xml')
 	# Name wasn't taken and is now reserved for this client
 	session['name'] = request.form['name']
 	return redirect('/take-quiz')
 
 @application.route('/take-quiz')
 def take_quiz():
-	return render_template('take-quiz.xhtml')
+	return Response(render_template('take-quiz.xhtml'), mimetype='application/xhtml+xml')
 
 # Used by a client to submit an answer
 # Takes an answer number [1-4] and some sort of client identification
