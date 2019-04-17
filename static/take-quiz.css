@@ -1,0 +1,49 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	font-family: "DejaVu Serif", serif;
+	color: white;
+	display: grid;
+	grid-template:
+		"question question" auto
+		"a1 a2" 1fr
+		"a3 a4" 1fr
+		"status status" auto
+		/ 1fr 1fr;
+	text-align: center;
+}
+
+#question {
+	grid-area: question;
+	font-size: 2em;
+	background: #6bc;
+}
+
+input {
+	display: none;
+}
+
+label {
+	display: grid;
+	align-content: center;
+	font-size: 2em;
+	padding: .5em;
+}
+
+label:nth-of-type(1) { background: #96f; }
+label:nth-of-type(2) { background: #6d9; }
+label:nth-of-type(3) { background: #f69; }
+label:nth-of-type(4) { background: #f96; }
+
+:checked + label {
+	font-weight: bold;
+}
+
+#status {
+	grid-area: status;
+	font-size: 1.5em;
+	background: #6cb;
+}

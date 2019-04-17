@@ -1,0 +1,17 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	font-family: "DejaVu Serif", serif;
+	color: white;
+	background: #6d9;
+	display: grid;
+	align-content: center;
+	text-align: center;
+}
+
+#error {
+	color: #f35;
+}

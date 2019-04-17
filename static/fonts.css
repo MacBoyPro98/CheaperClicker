@@ -1,0 +1,13 @@
+@font-face {
+	font-family: "DejaVu Serif";
+	src: url("fonts/DejaVuSerif.ttf");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "DejaVu Serif";
+	src: url("fonts/DejaVuSerif-Bold.ttf");
+	font-weight: bold;
+	font-style: normal;
+}

@@ -1,10 +1,11 @@
 import os
 import redis
-from flask import Flask
+from flask import Flask, redirect, request, render_template, session
 
-r = redis.from_url(os.environ.get("REDIS_URL"))
+r = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')
 
-application = Flask(__name__)
+application = Flask(__name__, static_url_path='')
+application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
 
 # Used by the host to start the quiz
 @application.route('/create-quiz', methods=['POST'])
@@ -12,10 +13,19 @@ def create_quiz():
 	raise NotImplementedError
 
 # Used by a client to register a name
-# Returns some sort of error if name is already taken
-@application.route('/set-name', methods=['POST'])
-def set_name():
-	raise NotImplementedError
+@application.route('/login', methods=['GET', 'POST'])
+def login():
+	if request.method == 'GET':
+		return render_template('login.xhtml')
+	if False: # TODO this branch executes when name was already taken
+		return render_template('login.xhtml', error=True)
+	# Name wasn't taken and is now reserved for this client
+	session['name'] = request.form['name']
+	return redirect('/take-quiz')
+
+@application.route('/take-quiz')
+def take_quiz():
+	return render_template('take-quiz.xhtml')
 
 # Used by a client to submit an answer
 # Takes an answer number [1-4] and some sort of client identification

@@ -1,0 +1,18 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<link rel="stylesheet" href="fonts.css" />
+	<link rel="stylesheet" href="take-quiz.css" />
+</head>
+<body>
+	<div id="question">What is Redis?</div>
+	<input type="radio" name="answer" id="answer1" value="1" />
+	<label for="answer1">A NoSQL database</label>
+	<input type="radio" name="answer" id="answer2" value="2" />
+	<label for="answer2">A breed of dog</label>
+	<input type="radio" name="answer" id="answer3" value="3" />
+	<label for="answer3">The best pizza topping</label>
+	<input type="radio" name="answer" id="answer4" value="4" />
+	<label for="answer4">A flavor of ice cream</label>
+	<div id="status">{{ session['name'] }}: <span id="points">3</span> points</div>
+</body>
+</html>

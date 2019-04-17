@@ -1,0 +1,14 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<link rel="stylesheet" href="fonts.css" />
+	<link rel="stylesheet" href="login.css" />
+</head>
+<body>
+	<form method="post">
+		<p><label for="name">What's your name?</label></p>
+		<p><input name="name" id="name" value="{{ request.form['name'] }}" /></p>
+		<p><input type="submit" value="Start quiz" /></p>
+		{% if error %}<p id="error">That name is already taken. Try another one.</p>{% endif %}
+	</form>
+</body>
+</html>
