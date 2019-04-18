@@ -4,16 +4,16 @@
 	<link rel="stylesheet" href="take-quiz.css" />
 </head>
 <body>
-	<div id="question">What is Redis?</div>
+	<div id="question" />
 	<input type="radio" name="answer" id="answer1" value="1" />
-	<label for="answer1">A NoSQL database</label>
+	<label for="answer1" />
 	<input type="radio" name="answer" id="answer2" value="2" />
-	<label for="answer2">A breed of dog</label>
+	<label for="answer2" />
 	<input type="radio" name="answer" id="answer3" value="3" />
-	<label for="answer3">The best pizza topping</label>
+	<label for="answer3" />
 	<input type="radio" name="answer" id="answer4" value="4" />
-	<label for="answer4">A flavor of ice cream</label>
-	<div id="status">{{ session['name'] }}: <span id="points">3</span> points</div>
+	<label for="answer4" />
+	<div id="status">{{ session['name'] }}: <span id="score">0</span> points</div>
 	<script src="take-quiz.js" />
 </body>
 </html>

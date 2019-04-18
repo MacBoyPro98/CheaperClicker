@@ -1,6 +1,7 @@
 import os
 import redis
 from flask import Flask, Response, redirect, request, render_template, session
+import json
 
 r = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')
 
@@ -39,7 +40,18 @@ def answer():
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
 def new_questions():
-	raise NotImplementedError
+	message = json.dumps({
+		'question': 'What is Redis?',
+		'answers': [
+			'A NoSQL database',
+			'A breed of dog',
+			'The best pizza topping',
+			'A flavor of ice cream',
+		],
+		'score': 3,
+	})
+	return Response(f'data:{message}\n\n', mimetype='text/event-stream')
+
 
 # Used by the host to advance to the next question
 # Grades responses to the current question
