@@ -9,9 +9,11 @@ application = Flask(__name__, static_url_path='')
 application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
 
 # Used by the host to start the quiz
-@application.route('/create-quiz', methods=['POST'])
+@application.route('/create-quiz', methods=['GET', 'POST'])
 def create_quiz():
-	raise NotImplementedError
+	if request.method == 'GET':
+		return Response(render_template('create-quiz.xhtml'), mimetype='application/xhtml+xml')
+	return request.files['quiz'].read()
 
 # Used by a client to register a name
 @application.route('/login', methods=['GET', 'POST'])
