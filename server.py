@@ -46,6 +46,9 @@ def new_questions():
 	score = 3
 	return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
 
+@application.route('/host')
+def host():
+	return Response(render_template('host.xhtml'), mimetype='application/xhtml+xml')
 
 # Used by the host to advance to the next question
 # Grades responses to the current question

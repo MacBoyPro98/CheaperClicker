@@ -1,0 +1,110 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	font-family: "DejaVu Serif", serif;
+	color: white;
+	background-color: black;
+	display: grid;
+	grid-template:
+		"stats leaderboard" 1fr
+		/ 3fr 1fr;
+}
+
+#stats {
+	display: grid;
+	grid-template:
+		"question question question question" auto
+		"answer1 answer2 answer3 answer4" 1fr
+		"footer footer footer footer" auto
+		/ 1fr 1fr 1fr 1fr;
+}
+
+#question {
+	grid-area: question;
+	font-size: 3em;
+	margin: .5em;
+}
+
+.answer {
+	display: grid;
+	grid-template:
+		"bar" 1fr
+		"text" 5em;
+}
+
+.answer.n1 { --color: #96f; }
+.answer.n2 { --color: #6d9; }
+.answer.n3 { --color: #f69; }
+.answer.n4 { --color: #f96; }
+
+.bar {
+	background-color: var(--color);
+	width: 20%;
+	justify-self: center;
+	align-self: end;
+}
+
+.statsInvisible .bar {
+	background: none;
+}
+
+.answer-text {
+	margin: 1em;
+	margin-top: 0;
+	background-color: var(--color);
+	display: grid;
+	align-content: center;
+	text-align: center;
+}
+
+.n1 .answer-text { border-radius: 40% 40% 97% 3%  / 54% 36% 64% 46%; }
+.n2 .answer-text { border-radius: 40% 40% 21% 79% / 21% 17% 83% 79%; }
+.n3 .answer-text { border-radius: 40% 40% 23% 77% / 33% 19% 81% 67%; }
+.n4 .answer-text { border-radius: 40% 40% 54% 46% / 57% 58% 42% 43%; }
+
+#footer {
+	grid-area: footer;
+	text-align: right;
+	margin-right: 1em;
+}
+
+#leaderboard {
+	margin: 2em 0;
+	padding: 0 .5em;
+	border-left: 1px solid white;
+	overflow: hidden;
+}
+
+.leaderboardInvisible #leaderboard {
+	display: none;
+}
+
+#leaderboard > table {
+	width: 100%;
+}
+
+#leaderboard > table tr:nth-child(1) { color: gold; }
+#leaderboard > table tr:nth-child(2) { color: silver; }
+#leaderboard > table tr:nth-child(3) { color: darkorange; }
+
+#leaderboard > table td:nth-child(2) {
+	text-align: right;
+	font-weight: bold;
+}
+
+#qr {
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+	background: black;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.qrInvisible #qr {
+	display: none;
+}
