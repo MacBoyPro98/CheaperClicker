@@ -42,18 +42,13 @@ def answer():
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
 def new_questions():
-	message = json.dumps({
-		'question': 'What is Redis?',
-		'answers': [
-			'A NoSQL database',
-			'A breed of dog',
-			'The best pizza topping',
-			'A flavor of ice cream',
-		],
-		'score': 3,
-	})
-	return Response(f'data:{message}\n\n', mimetype='text/event-stream')
+	question = '{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]}'
+	score = 3
+	return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
 
+@application.route('/host')
+def host():
+	return Response(render_template('host.xhtml'), mimetype='application/xhtml+xml')
 
 # Used by the host to advance to the next question
 # Grades responses to the current question
