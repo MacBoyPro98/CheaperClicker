@@ -56,10 +56,10 @@ def host():
 # Results in events being sent from /new-questions
 @application.route('/next-question', methods=['POST'])
 def next_question():
-	raise NotImplementedError
+	return '{"question":{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]},"leaderboard":[["Steve",3],["Bob",2],["Joe",1]]}'
 
 # Used by the host to create a live-updating response chart
 # Returns a stream of answer counts - perhaps arrays like [1,15,0,2]?
 @application.route('/answer-stats')
 def answer_stats():
-	raise NotImplementedError
+	return Response('data:[2,17,0,1]\n\n', mimetype='text/event-stream')
