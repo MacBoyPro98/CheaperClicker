@@ -1,5 +1,6 @@
 document.getElementById('qr').src = QRCode.generatePNG(new URL('login', document.location).toString());
 
+
 function updateStats(responseCounts) {
 	let totalResponses = 0;
 	for (let i = 0; i < 4; i++) {
@@ -9,6 +10,20 @@ function updateStats(responseCounts) {
 		document.querySelector(`.answer.n${i+1} > .bar`).style.height = `${responseCounts[i] / totalResponses * 100}%`;
 	}
 	document.getElementById('responses').textContent = totalResponses;
+}
+
+const eventSource = new EventSource('answer-stats');
+eventSource.addEventListener('message', (e) => {
+	const responseCounts = JSON.parse(e.data);
+	updateStats(responseCounts);
+});
+
+
+function updateQuestion({question, answers}) {
+	document.getElementById('question').textContent = question;
+	for (let i = 0; i < 4; i++) {
+		document.querySelector(`.answer.n${i+1} > .answer-text`).textContent = answers[i];
+	}
 }
 
 function updateLeaderboard(entries) {
@@ -30,8 +45,18 @@ function updateLeaderboard(entries) {
 	oldTbody.parentNode.replaceChild(tbody, oldTbody);
 }
 
+async function nextQuestion() {
+	const response = await fetch('next-question', {method: 'POST'});
+	const {question, leaderboard} = await response.json();
+	updateQuestion(question);
+	updateLeaderboard(leaderboard);
+}
+
+
 addEventListener('keydown', (e) => {
-	if (e.key === 'q') {
+	if (e.key === 'n') {
+		nextQuestion();
+	} else if (e.key === 'q') {
 		document.body.classList.toggle('qrInvisible');
 	} else if (e.key === 's') {
 		document.body.classList.toggle('statsInvisible');
@@ -39,11 +64,3 @@ addEventListener('keydown', (e) => {
 		document.body.classList.toggle('leaderboardInvisible');
 	}
 });
-
-updateStats([2, 17, 0, 1]);
-updateLeaderboard([
-	["This", 100],
-	["is", 50],
-	["a", 30],
-	["test", 0],
-]);
