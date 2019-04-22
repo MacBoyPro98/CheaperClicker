@@ -2,19 +2,19 @@ import redis
 import string
 import json
 import os
-from flask import Flask, Response, redirect, request, render_template, session
+from flask import Flask, Response, redirect, request, render_template, session #not sure if this is needed
 
 class redisDB:
-    def __init__(self):        
+    #flask_application = Flask(__name__, static_url_path='')
+    def __init__(self, flask_application):        
         self.redisClient = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')  
-        self.application = Flask(__name__, static_url_path='')
-        self.application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32) 
+        self.application = flask_application
 
     def add_user_answer(self):
         question = self.redisClient.get("CurrentQuestion")    
         userName = session['name']          
         answer = request.form['name']
-        self.redisClient.hset(question, userName, answer)
+        self.redisClient.hset("Answers" + question, userName, answer)
         self.redisClient.publish("answer-stats", "new user answer")        
 
         #unknown if the next two functions are needed
@@ -24,7 +24,7 @@ class redisDB:
         return(self.redisClient.hget(question, userName))   
     
     def get_questionCount(self):         
-        return self.redisClient.get("qc") 
+        return self.redisClient.get("QuestionCount") 
 
     def store_question(self, question_string):        
         string_list = question_string.splitlines()        
@@ -33,19 +33,20 @@ class redisDB:
         potential_answer_list = []
         question_count = 0
         for iterator in range(1, length + 2):            
-            if iterator % 7 == 0 or iterator == 1:
+            if iterator % 7 == 0 or iterator == 1:  #this line is the question
                 question = string_list[iterator -1].strip()
                 question_count += 1                                
-            elif iterator % 6 == 0:
+            elif iterator % 6 == 0:     # this line is blank signaling the end of a question, we go ahead and enter in the data we have 
                 question_string = json.dumps({"question": question, "answers": potential_answer_list})
-                self.redisClient.hset("Question" + str(int(iterator/6)), question_string , correct_awnser )                
+                self.redisClient.hset("Question" + str(int(iterator/6)), "question", question_string)
+                self.redisClient.hset("Question" + str(int(iterator/6)), "ans", correct_awnser )                
                 potential_answer_list.clear()
-            else:
+            else:       #these lines will be the potential awnsers 
                 string_line = string_list[iterator-1].strip()
                 if string_line[0] == "+":
                     correct_awnser = iterator % 6 - 1                   
                 potential_answer_list.append(string_line[2:])         
-        self.redisClient.set("qc", question_count)           
+        self.redisClient.set("QuestionCount", question_count)           
 
 #store sample questions
 def input_questions(RDB):
@@ -65,7 +66,7 @@ def input_questions(RDB):
    
 
 RDB = redisDB()
-#input_questions(RDB)
+input_questions(RDB)
 #print(RDB.get_questionCount())
 
 
