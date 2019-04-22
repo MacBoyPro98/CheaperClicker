@@ -43,6 +43,7 @@ class redisDB:
                     correct_awnser = iterator % 6 - 1                   
                 potential_answer_list.append(string_line[2:])         
         self.redisClient.set("QuestionCount", question_count)           
+        self.redisClient.set("CurrentQuestion", 1)
 
 #store sample questions
 def input_questions(RDB):
