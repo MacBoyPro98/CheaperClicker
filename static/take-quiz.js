@@ -12,5 +12,6 @@ eventSource.addEventListener('message', (e) => {
 	for (let i = 0; i < 4; i++) {
 		labels[i].textContent = answers[i];
 	}
+	document.querySelector(':checked').checked = false;
 	document.getElementById('score').textContent = score;
 });
