@@ -9,7 +9,7 @@ class redisDB:
 
     #get name from session['name'] and answer from request.form['name']
     def add_user_answer(self, name, answer):
-        questionNum = self.redisClient.get("CurrentQuestion")        
+        questionNum = self.redisClient.get("CurrentQuestion").decode("utf-8")
         self.redisClient.hset("Answers" + questionNum, name, answer)
         self.redisClient.publish("answer-stats", "new user answer")        
 
