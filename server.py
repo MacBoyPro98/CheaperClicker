@@ -46,7 +46,7 @@ def answer():
 @application.route('/new-questions')
 def new_questions():
 	question = '{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]}'
-	score = 3
+	score = 0
 	return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
 
 @application.route('/host')
