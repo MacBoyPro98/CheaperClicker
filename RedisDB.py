@@ -2,19 +2,15 @@ import redis
 import string
 import json
 import os
-from flask import Flask, Response, redirect, request, render_template, session #not sure if this is needed
 
-class redisDB:
-    #flask_application = Flask(__name__, static_url_path='')
-    def __init__(self, flask_application):        
-        self.redisClient = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')  
-        self.application = flask_application
+class redisDB:    
+    def __init__(self):        
+        self.redisClient = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')       
 
-    def add_user_answer(self):
-        question = self.redisClient.get("CurrentQuestion")    
-        userName = session['name']          
-        answer = request.form['name']
-        self.redisClient.hset("Answers" + question, userName, answer)
+    #get name from session['name'] and answer from request.form['name']
+    def add_user_answer(self, name, answer):
+        questionNum = self.redisClient.get("CurrentQuestion")        
+        self.redisClient.hset("Answers" + questionNum, name, answer)
         self.redisClient.publish("answer-stats", "new user answer")        
 
         #unknown if the next two functions are needed
