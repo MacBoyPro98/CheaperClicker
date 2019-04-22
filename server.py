@@ -1,9 +1,10 @@
 import os
-import redis
 from flask import Flask, Response, redirect, request, render_template, session
 import json
 
-r = redis.from_url(os.environ.get('REDIS_URL') or 'redis://127.0.0.1:6379/')
+import RedisDB
+
+redisDB = RedisDB.redisDB()
 
 application = Flask(__name__, static_url_path='')
 application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
@@ -13,7 +14,8 @@ application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
 def create_quiz():
 	if request.method == 'GET':
 		return Response(render_template('create-quiz.xhtml'), mimetype='application/xhtml+xml')
-	return request.files['quiz'].read()
+	redisDB.store_question(request.files['quiz'].read().decode('utf-8'))
+	return redirect('/host')
 
 # Used by a client to register a name
 @application.route('/login', methods=['GET', 'POST'])
@@ -35,7 +37,8 @@ def take_quiz():
 # Results in events being sent from /answer-stats
 @application.route('/answer', methods=['POST'])
 def answer():
-	raise NotImplementedError
+	redisDB.add_user_answer(session['name'], request.form['answer'])
+	return '', 204
 
 # Used by a client to listen for new questions
 # Takes some sort of client identification
