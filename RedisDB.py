@@ -19,7 +19,7 @@ class redisDB:
         userName = session['name']
         return(self.redisClient.hget(question, userName))   
     
-    def login(self,username):
+    def login(self,userName):
         if redis.zadd(request.form['name'],0,nx)==0:
             raise Exception("You already exist")
         elif
