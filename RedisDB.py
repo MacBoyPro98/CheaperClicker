@@ -15,7 +15,7 @@ class redisDB:
 
      def login(self,name):
         return redis.zadd(Scores,request.form['name'],0,nx)
-            raise Exception("You already exist")
+           
 
         #unknown if the next two functions are needed
     def get_user_answer(self, question, userName):
