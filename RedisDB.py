@@ -13,17 +13,16 @@ class redisDB:
         self.redisClient.hset("Answers" + questionNum, name, answer)
         self.redisClient.publish("answer-stats", "new user answer")        
 
+     def login(self,name):
+        return redis.zadd(Scores,request.form['name'],0,nx)
+            raise Exception("You already exist")
+
         #unknown if the next two functions are needed
     def get_user_answer(self, question, userName):
         question = getCurrentQuestion()
         userName = session['name']
         return(self.redisClient.hget(question, userName))   
-    
-    def login(self,userName):
-        if redis.zadd(scores,request.form['name'],0,nx)==0:
-            raise Exception("You already exist")
-        elif
-            userName=session[request.form['name']]
+        
                           
     def get_questionCount(self):         
         return self.redisClient.get("QuestionCount") 
