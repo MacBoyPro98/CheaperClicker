@@ -16,16 +16,6 @@ class redisDB:
     def login(self,userName):
         return self.redisClient.zadd("Scores",{userName: 0},nx=True)
 
-        #unknown if the next two functions are needed
-    def get_user_answer(self, question, userName):
-        question = getCurrentQuestion()
-        userName = session['name']
-        return(self.redisClient.hget(question, userName))   
-        
-                          
-    def get_questionCount(self):         
-        return self.redisClient.get("QuestionCount") 
-
     def next_question(self):
         questionNum=self.redisClient.get("CurrentQuestion").decode("utf-8")
         students=self.redisClient.hgetall("Answers"+str(questionNum))
