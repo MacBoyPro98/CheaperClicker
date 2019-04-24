@@ -13,9 +13,8 @@ class redisDB:
         self.redisClient.hset("Answers" + questionNum, name, answer)
         self.redisClient.publish("answer-stats", "new user answer")        
 
-     def login(self,userName):
-        return redis.zadd(Scores,userName,0,nx)
-           
+    def login(self,userName):
+        return self.redisClient.zadd("Scores",{userName: 0},nx=True)
 
         #unknown if the next two functions are needed
     def get_user_answer(self, question, userName):
