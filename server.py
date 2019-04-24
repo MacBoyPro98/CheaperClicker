@@ -22,7 +22,7 @@ def create_quiz():
 def login():
 	if request.method == 'GET':
 		return Response(render_template('login.xhtml'), mimetype='application/xhtml+xml')
-	if False: # TODO this branch executes when name was already taken
+	if not redisDB.login(request.form['name']):
 		return Response(render_template('login.xhtml', error=True), mimetype='application/xhtml+xml')
 	# Name wasn't taken and is now reserved for this client
 	session['name'] = request.form['name']
