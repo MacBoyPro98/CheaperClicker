@@ -45,9 +45,12 @@ def answer():
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
 def new_questions():
-	question = '{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]}'
-	score = 0
-	return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
+    p = redisDB.redisClient.pubsub()
+    p.subscribe("Question*")
+
+    question = redisDB.get_current_question()
+    score = 0
+    return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
 
 @application.route('/host')
 def host():
@@ -59,10 +62,20 @@ def host():
 # Results in events being sent from /new-questions
 @application.route('/next-question', methods=['POST'])
 def next_question():
-	return '{"question":{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]},"leaderboard":[["Steve",3],["Bob",2],["Joe",1]]}'
+    # Grade responses to current question
+
+    question = redisDB.get_next_question()
+    leaderboard = [["Steve",3],["Bob",2],["Joe",1]]
+
+    return Response(f'data:{{"question":{question},"leaderboard":{leaderboard}}}\n\n', mimetype='text/event-stream')
+# return '{"question":{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]},"leaderboard":[["Steve",3],["Bob",2],["Joe",1]]}'
 
 # Used by the host to create a live-updating response chart
 # Returns a stream of answer counts - perhaps arrays like [1,15,0,2]?
 @application.route('/answer-stats')
 def answer_stats():
 	return Response('data:[2,17,0,1]\n\n', mimetype='text/event-stream')
+
+@application.route('/test')
+def test():
+    return Response(redisDB.get_next_question())

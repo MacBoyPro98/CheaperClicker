@@ -49,6 +49,23 @@ class redisDB:
         self.redisClient.set("QuestionCount", question_count)           
         self.redisClient.set("CurrentQuestion", 1)
 
+    # returns the question at the current question index
+    def get_current_question(self):
+        questionNum = self.redisClient.get("CurrentQuestion").decode("utf-8")
+
+        return self.redisClient.hget("Question" + questionNum, "question")
+
+    # increments the question index if possible
+    # returns the question at the new question index
+    def get_next_question(self):
+        currentQ = int(self.redisClient.get("CurrentQuestion"))
+        questionCount = int(self.redisClient.get("QuestionCount"))
+        currentQ += 1
+        if currentQ <= questionCount:
+            self.redisClient.set("CurrentQuestion", currentQ)
+
+        return self.redisClient.hget("Question" + str(currentQ), "question")
+
 #store sample questions
 def input_questions(RDB):
     practice_string = """What is the best food in the world?
