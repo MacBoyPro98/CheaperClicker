@@ -51,29 +51,3 @@ class redisDB:
                 potential_answer_list.append(string_line[2:])         
         self.redisClient.set("QuestionCount", question_count)           
         self.redisClient.set("CurrentQuestion", 1)
-
-#store sample questions
-def input_questions(RDB):
-    practice_string = """What is the best food in the world?
-    - tacos
-    + spaghetti
-    - pizza
-    - burger
-
-    What is the best database in the world?
-    - Microsoft Access
-    - Oracle
-    - Redis
-    + It depends on your situation and that’s why you have to have a broad understanding of the field"""  
-
-    RDB.store_question(practice_string)
-   
-
-RDB = redisDB()
-input_questions(RDB)
-#print(RDB.get_questionCount())
-
-
-
-
-    

@@ -1,0 +1,11 @@
+What is the best food in the world?
+- tacos
++ spaghetti
+- pizza
+- burger
+
+What is the best database in the world?
+- Microsoft Access
+- Oracle
+- Redis
++ It depends on your situation and that’s why you have to have a broad understanding of the field
