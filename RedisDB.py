@@ -26,6 +26,19 @@ class redisDB:
     def get_questionCount(self):         
         return self.redisClient.get("QuestionCount") 
 
+    def next_question(self):
+        questionNum=self.redisClient.get("CurrentQuestion").decode("utf-8")
+        students=self.redisClient.hgetall("Answers"+str(questionNum))
+        correct=self.redisClient.hget("Question"+str(questionNum),"ans")
+        for name, answer in students.items():
+            if answer==correct:
+                self.redisClient.zadd("Scores",{name:1})
+        questionString=self.redisClient.hget("Question" + str(int(questionNum)+1), "question").decode("utf-8")
+        theleader=self.redisClient.zrange("Scores", 0, -1, desc=True, withscores=True)
+        self.redisClient.set("CurrentQuestion", int(questionNum)+1)
+        self.redisClient.publish("next-question",int(questionNum)+1) 
+        return json.dumps({"question": json.loads(questionString), "leaderboard": [(name.decode("utf-8"), score) for (name, score) in theleader]})
+
     def store_question(self, question_string):        
         string_list = question_string.splitlines()        
         length = len(string_list)
