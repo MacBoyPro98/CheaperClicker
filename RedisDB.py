@@ -35,19 +35,20 @@ class redisDB:
         question = ""
         potential_answer_list = []
         question_count = 0
-        for iterator in range(1, length + 2):            
-            if iterator % 7 == 0 or iterator == 1:  #this line is the question
-                question = string_list[iterator -1].strip()
-                question_count += 1                                
-            elif iterator % 6 == 0:     # this line is blank signaling the end of a question, we go ahead and enter in the data we have 
+        for iterator in range(0, length + 1):
+            if iterator % 6 == 0:  #this line is the question
+                question = string_list[iterator].strip()
+                correct_awnser = 0
+            elif iterator % 6 == 5:     # this line is blank signaling the end of a question, we go ahead and enter in the data we have
                 question_string = json.dumps({"question": question, "answers": potential_answer_list})
-                self.redisClient.hset("Question" + str(int(iterator/6)), "question", question_string)
-                self.redisClient.hset("Question" + str(int(iterator/6)), "ans", correct_awnser )                
+                self.redisClient.hset("Question" + str(int(iterator/6) + 1), "question", question_string)
+                self.redisClient.hset("Question" + str(int(iterator/6) + 1), "ans", correct_awnser)
                 potential_answer_list.clear()
-            else:       #these lines will be the potential awnsers 
-                string_line = string_list[iterator-1].strip()
+                question_count += 1
+            else:       #these lines will be the potential awnsers
+                string_line = string_list[iterator].strip()
                 if string_line[0] == "+":
-                    correct_awnser = iterator % 6 - 1                   
+                    correct_awnser = iterator % 6
                 potential_answer_list.append(string_line[2:])         
         self.redisClient.set("QuestionCount", question_count)           
         self.redisClient.set("CurrentQuestion", 1)
