@@ -22,7 +22,7 @@ class redisDB:
         correct=self.redisClient.hget("Question"+str(questionNum),"ans")
         for name, answer in students.items():
             if answer==correct:
-                self.redisClient.zadd("Scores",{name:1})
+                self.redisClient.zincrby("Scores", 1, name)
         questionString=self.redisClient.hget("Question" + str(int(questionNum)+1), "question").decode("utf-8")
         theleader=self.redisClient.zrange("Scores", 0, -1, desc=True, withscores=True)
         self.redisClient.set("CurrentQuestion", int(questionNum)+1)
