@@ -7,7 +7,7 @@ function updateStats(responseCounts) {
 		totalResponses += responseCounts[i];
 	}
 	for (let i = 0; i < 4; i++) {
-		document.querySelector(`.answer.n${i+1} > .bar`).style.height = `${responseCounts[i] / totalResponses * 100}%`;
+		document.querySelector(`.answer.n${i+1} > .bar`).style.height = totalResponses === 0 ? '0' : `${responseCounts[i] / totalResponses * 100}%`;
 	}
 	document.getElementById('responses').textContent = totalResponses;
 }
