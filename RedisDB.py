@@ -25,8 +25,11 @@ class redisDB:
                 self.redisClient.zincrby("Scores", 1, name)
         questionString=self.redisClient.hget("Question" + str(int(questionNum)+1), "question").decode("utf-8")
         theleader=self.redisClient.zrange("Scores", 0, -1, desc=True, withscores=True)
-        self.redisClient.set("CurrentQuestion", int(questionNum)+1)
-        self.redisClient.publish("next-question",int(questionNum)+1) 
+        currentQuestion = self.redisClient.get("CurrentQuestion").decode("utf-8")
+        questionCount = self.redisClient.get("QuestionCount").decode("utf-8")
+        if currentQuestion < questionCount:
+            self.redisClient.set("CurrentQuestion", int(questionNum)+1)
+            self.redisClient.publish("next-question",int(questionNum)+1)
         return json.dumps({"question": json.loads(questionString), "leaderboard": [(name.decode("utf-8"), score) for (name, score) in theleader]})
 
     def store_question(self, question_string):        

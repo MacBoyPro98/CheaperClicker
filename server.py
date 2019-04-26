@@ -7,7 +7,7 @@ import RedisDB
 redisDB = RedisDB.redisDB()
 
 application = Flask(__name__, static_url_path='')
-application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
+application.secret_key = "poiu"
 
 # Used by the host to start the quiz
 @application.route('/create-quiz', methods=['GET', 'POST'])
@@ -45,9 +45,29 @@ def answer():
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
 def new_questions():
-	question = '{"question": "What is Redis?","answers": ["A NoSQL database","A breed of dog","The best pizza topping","A flavor of ice cream"]}'
-	score = 0
-	return Response(f'data:{{"question":{question},"score":{score}}}\n\n', mimetype='text/event-stream')
+	return Response(messageResponse(), mimetype='text/event-stream')
+
+def calculateMessageData():
+	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
+	p.subscribe("next-question")
+
+	try:
+		yield f'data:{calculateMessageData()}\n\n'
+		for message in p.listen():
+			yield f'data:{calculateMessageData()}\n\n'
+	except GeneratorExit:
+		p.unsubscribe()
+
+
+def messageResponse():
+	p = redisDB.redisClient.pubsub()
+	p.subscribe("next-question")
+
+	for message in p.listen():
+		question = message["data"]
+		score = redisDB.redisClient.zscore("Scores", session["name"])
+		yield 'data:{{"question":{question},"score":{score}}}\n\n'
+
 
 @application.route('/host')
 def host():
@@ -65,4 +85,25 @@ def next_question():
 # Returns a stream of answer counts - perhaps arrays like [1,15,0,2]?
 @application.route('/answer-stats')
 def answer_stats():
-	return Response('data:[2,17,0,1]\n\n', mimetype='text/event-stream')
+	return Response(responseGen(), mimetype='text/event-stream')
+
+def calculateData():
+	questionNum = redisDB.redisClient.get("CurrentQuestion").decode("utf-8")
+	answers = redisDB.redisClient.hvals("Answers" + str(questionNum))
+
+	arr = [0,0,0,0]
+	for answer in answers:
+		arr[int(answer.decode("utf-8")) - 1] += 1
+
+	return json.dumps(arr)
+
+def responseGen():
+	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
+	p.subscribe("answer-stats")
+
+	try:
+		yield f'data:{calculateData()}\n\n'
+		for message in p.listen():
+				yield f'data:{calculateData()}\n\n'
+	except GeneratorExit:
+			p.unsubscribe()
