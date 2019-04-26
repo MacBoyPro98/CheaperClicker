@@ -45,29 +45,24 @@ def answer():
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
 def new_questions():
-	return Response(messageResponse(), mimetype='text/event-stream')
+	return Response(messageResponse(session["name"]), mimetype='text/event-stream')
 
-def calculateMessageData():
+def calculateMessageData(name):
+	questionNum = redisDB.redisClient.get("CurrentQuestion").decode("utf-8")
+	question = redisDB.redisClient.hget("Question" + questionNum, "question").decode("utf-8")
+	score = redisDB.redisClient.zscore("Scores", name)
+	return f'{{"question":{question},"score":{score}}}'
+
+def messageResponse(name):
 	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
 	p.subscribe("next-question")
 
 	try:
-		yield f'data:{calculateMessageData()}\n\n'
+		yield f'data:{calculateMessageData(name)}\n\n'
 		for message in p.listen():
-			yield f'data:{calculateMessageData()}\n\n'
+			yield f'data:{calculateMessageData(name)}\n\n'
 	except GeneratorExit:
 		p.unsubscribe()
-
-
-def messageResponse():
-	p = redisDB.redisClient.pubsub()
-	p.subscribe("next-question")
-
-	for message in p.listen():
-		question = message["data"]
-		score = redisDB.redisClient.zscore("Scores", session["name"])
-		yield 'data:{{"question":{question},"score":{score}}}\n\n'
-
 
 @application.route('/host')
 def host():
@@ -100,6 +95,7 @@ def calculateData():
 def responseGen():
 	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
 	p.subscribe("answer-stats")
+	p.subscribe("next-question")
 
 	try:
 		yield f'data:{calculateData()}\n\n'
