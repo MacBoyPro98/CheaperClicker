@@ -3,18 +3,27 @@ from flask import Flask, Response, redirect, request, render_template, session
 import json
 
 import RedisDB
+from auth import requires_auth_role
 
 redisDB = RedisDB.redisDB()
 
 application = Flask(__name__, static_url_path='')
 application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
 
+create_quiz_username = 'user'
+create_quiz_password = os.environ.get('CREATE_QUIZ_PASSWORD')
+
 # Used by the host to start the quiz
 @application.route('/create-quiz', methods=['GET', 'POST'])
 def create_quiz():
+	if not (request.authorization
+			and request.authorization.username == create_quiz_username
+			and request.authorization.password == create_quiz_password):
+		return '401 Unauthorized', 401, {'WWW-Authenticate': 'Basic'}
 	if request.method == 'GET':
 		return Response(render_template('create-quiz.xhtml'), mimetype='application/xhtml+xml')
 	redisDB.store_question(request.files['quiz'].read().decode('utf-8'))
+	session['auth_role'] = 'host'
 	return redirect('/host')
 
 # Used by a client to register a name
@@ -26,9 +35,11 @@ def login():
 		return Response(render_template('login.xhtml', error=True), mimetype='application/xhtml+xml')
 	# Name wasn't taken and is now reserved for this client
 	session['name'] = request.form['name']
+	session['auth_role'] = 'student'
 	return redirect('/take-quiz')
 
 @application.route('/take-quiz')
+@requires_auth_role('student')
 def take_quiz():
 	return Response(render_template('take-quiz.xhtml'), mimetype='application/xhtml+xml')
 
@@ -36,6 +47,7 @@ def take_quiz():
 # Takes an answer number [1-4] and some sort of client identification
 # Results in events being sent from /answer-stats
 @application.route('/answer', methods=['POST'])
+@requires_auth_role('student')
 def answer():
 	redisDB.add_user_answer(session['name'], request.form['answer'])
 	return '', 204
@@ -44,6 +56,7 @@ def answer():
 # Takes some sort of client identification
 # Returns a stream of question objects and updates to the client's score
 @application.route('/new-questions')
+@requires_auth_role('student')
 def new_questions():
 	return Response(messageResponse(session["name"]), mimetype='text/event-stream')
 
@@ -65,6 +78,7 @@ def messageResponse(name):
 		p.unsubscribe()
 
 @application.route('/host')
+@requires_auth_role('host')
 def host():
 	return Response(render_template('host.xhtml'), mimetype='application/xhtml+xml')
 
@@ -73,12 +87,14 @@ def host():
 # Returns the new question and an updated leaderboard
 # Results in events being sent from /new-questions
 @application.route('/next-question', methods=['POST'])
+@requires_auth_role('host')
 def next_question():
 	return redisDB.next_question()
 
 # Used by the host to create a live-updating response chart
 # Returns a stream of answer counts - perhaps arrays like [1,15,0,2]?
 @application.route('/answer-stats')
+@requires_auth_role('host')
 def answer_stats():
 	return Response(responseGen(), mimetype='text/event-stream')
 
