@@ -33,6 +33,7 @@ class redisDB:
         return json.dumps({"question": json.loads(questionString), "leaderboard": [(name.decode("utf-8"), score) for (name, score) in theleader]})
 
     def store_question(self, question_string):        
+        self.redisClient.flushdb()
         string_list = question_string.splitlines()        
         length = len(string_list)
         question = ""
