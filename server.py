@@ -7,7 +7,7 @@ import RedisDB
 redisDB = RedisDB.redisDB()
 
 application = Flask(__name__, static_url_path='')
-application.secret_key = "poiu"
+application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
 
 # Used by the host to start the quiz
 @application.route('/create-quiz', methods=['GET', 'POST'])
