@@ -1,4 +1,5 @@
 import os
+import threading
 from flask import Flask, Response, redirect, request, render_template, session
 import json
 
@@ -6,6 +7,22 @@ import RedisDB
 from auth import requires_auth_role
 
 redisDB = RedisDB.redisDB()
+
+pubsub_lock = threading.Lock()
+answer_stats_events = set()
+next_question_events = set()
+
+def wake(events):
+	with pubsub_lock:
+		for event in events:
+			event.set()
+
+pubsub = redisDB.redisClient.pubsub()
+pubsub.subscribe(**{
+	'answer-stats': lambda _: wake(answer_stats_events),
+	'next-question': lambda _: wake(next_question_events),
+})
+pubsub.run_in_thread(sleep_time=1, daemon=True)
 
 application = Flask(__name__, static_url_path='')
 application.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
@@ -67,15 +84,17 @@ def calculateMessageData(name):
 	return f'{{"question":{question},"score":{score}}}'
 
 def messageResponse(name):
-	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
-	p.subscribe("next-question")
-
+	event = threading.Event()
+	with pubsub_lock:
+		next_question_events.add(event)
 	try:
-		yield f'data:{calculateMessageData(name)}\n\n'
-		for message in p.listen():
+		while True:
+			event.clear()
 			yield f'data:{calculateMessageData(name)}\n\n'
+			event.wait()
 	except GeneratorExit:
-		p.unsubscribe()
+		with pubsub_lock:
+			next_question_events.remove(event)
 
 @application.route('/host')
 @requires_auth_role('host')
@@ -109,13 +128,16 @@ def calculateData():
 	return json.dumps(arr)
 
 def responseGen():
-	p = redisDB.redisClient.pubsub(ignore_subscribe_messages=True)
-	p.subscribe("answer-stats")
-	p.subscribe("next-question")
-
+	event = threading.Event()
+	with pubsub_lock:
+		answer_stats_events.add(event)
+		next_question_events.add(event)
 	try:
-		yield f'data:{calculateData()}\n\n'
-		for message in p.listen():
-				yield f'data:{calculateData()}\n\n'
+		while True:
+			event.clear()
+			yield f'data:{calculateData()}\n\n'
+			event.wait()
 	except GeneratorExit:
-			p.unsubscribe()
+		with pubsub_lock:
+			answer_stats_events.remove(event)
+			next_question_events.remove(event)
